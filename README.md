@@ -16,7 +16,11 @@ The last stated above command writes the new snapshot to the database, then chec
 
 When the 'notify' command come executed it checks does exists any subscriber who's price value comes between both passed prices. If found such subscriber/s, the system sends email to the subscriber's mailbox an message that the stated by him price been reached. Before the message come submitted come executed additional check to the system cache, ensuring there no message sent to the same subscriber in the last hour.
 
+### External Api failure
+
 While the site is active, any disruption in the API processing generates error log added to the system's log on every 2.5sec execution. When the API resores own work the normal processing continues.
+
+### Current server failure
 
 In case of the current server outage, the system will stop the data feeding and notifications. After the server restoration it will continue from the last recorded snapshot value, sending notification only to the short list of the subscribers which price value will become within the last recorded before the failure price and the new one taken after the server reboot.
 
@@ -40,7 +44,7 @@ To allow the site data feeding and the visitor subscription processing, run via 
    php artisan short-schedule:run
    ```
 
-2. Queue &mdash;Êfor the subscribers sendmail jobs to be processed:
+2. Queue &mdash; for the subscribers sendmail jobs to be processed:
 
    ```bash
    php artisan queue:listen
