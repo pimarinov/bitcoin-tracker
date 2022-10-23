@@ -9,7 +9,7 @@ use App\Models\Snapshot;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
-class TakeSnapshotActionTest extends TestCase
+class SnapshotTakeActionTest extends TestCase
 {
     use DatabaseMigrations;
 

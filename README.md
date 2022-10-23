@@ -6,7 +6,7 @@ Site that has a single page showing chart with Bitcoin price in USD. Data come c
 
 ## Description
 
-The shown on the page chart come loaded directly by the controller, then uses JavaScript `setInterval` function to update the chart content on every 2500ms.
+As agreed the View.js or React FE part of the task was omitted. The shown on the page chart come loaded directly by the controller, then uses JavaScript `setInterval` function to update the chart content on every 2500ms.
 
 The data feeding API, adds restriction of maximum 30 calls per minute. The site was build to pull data from it on every 2.5 seconds, which ensures the Api call will not become restricted. 
 
@@ -18,15 +18,13 @@ When the 'notify' command come executed it checks does exists any subscriber who
 
 ### External Api failure
 
-While the site is active, any disruption in the API processing generates error log added to the system's log on every 2.5sec execution. When the API resores own work the normal processing continues.
+While the site is active, any disruption in the API processing generates error log added to the system's log on every 2.5sec execution. When the API restores own work the normal processing continues.
 
 ### Current server failure
 
 In case of the current server outage, the system will stop the data feeding and notifications. After the server restoration it will continue from the last recorded snapshot value, sending notification only to the short list of the subscribers which price value will become within the last recorded before the failure price and the new one taken after the server reboot.
 
 In case of such outage the site cache will be lost. Solution here can be external cache usage and/or the additional storage of the notified subscribers ids within every 'price-increase' shapshot record. 
-
-![Email-preview](mail-message-screenshot.png)
 
 ## Installation
 
@@ -83,6 +81,8 @@ Check the **coverage** folder after the test been executed. To load coverage rep
 ```bash
 vendor/bin/phpunit --coverage-html
 ```
+
+![tests-coverage](tests-coverage-screenshot.png)
 
 ## License
 
