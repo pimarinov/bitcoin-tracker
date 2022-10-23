@@ -7,6 +7,7 @@ Site that has a single page showing chart with Bitcoin price in USD. Data come c
 ## Description
 
 *As agreed the View.js or React - FE part of the task was omitted.*
+
 The shown on the page chart come loaded directly by the controller, then uses JavaScript `setInterval` function to update the chart content on every 2500ms.
 
 The data feeding API, adds restriction of maximum 30 calls per minute. The site was build to pull data from it on every 2.5 seconds, which ensures the Api call will not become restricted. 
