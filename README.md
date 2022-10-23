@@ -2,7 +2,7 @@
 
 Site that has a single page showing chart with Bitcoin price in USD. Data come collected by the [Bitfinex API](https://docs.bitfinex.com/v1/reference#rest-public-ticker). On the page exists simple webform allowing the visitor to register for mail notification at given price value. The systems sends notification every time the price reaches the value.
 
-![](C:\dev\bitcoin-tracker\page-screenshot.png)
+![Page-preview](page-screenshot.png)
 
 ## Description
 
@@ -22,7 +22,7 @@ In case of the current server outage, the system will stop the data feeding and 
 
 In case of such outage the site cache will be lost. Solution here can be external cache usage and/or the additional storage of the notified subscribers ids within every 'price-increase' shapshot record. 
 
-
+![Email-preview](mail-message-screenshot.png)
 
 ## Installation
 
@@ -40,7 +40,7 @@ To allow the site data feeding and the visitor subscription processing, run via 
    php artisan short-schedule:run
    ```
 
-2. Queue &mdash;Â for the subscribers sendmail jobs to be processed:
+2. Queue &mdash;Êfor the subscribers sendmail jobs to be processed:
 
    ```bash
    php artisan queue:listen
