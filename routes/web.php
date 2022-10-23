@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\TestController;
+use App\Http\Controllers\BitcoinController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,5 +16,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/bitcoin'); //return view('welcome');
 });
+
+Route::get('bitcoin', [BitcoinController::class, 'index'])
+    ->name('bitcoin.index');
+Route::get('bitcoin-snapshots', [BitcoinController::class, 'snapshots'])
+    ->name('bitcoin.snapshots');
+Route::post('bitcoin-subscribe-for-price-reach', [BitcoinController::class, 'subscribe'])
+    ->name('bitcoin.subscribe-for-price-reach');

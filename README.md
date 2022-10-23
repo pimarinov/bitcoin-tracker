@@ -1,61 +1,85 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Bitcoin tracker &mdash; ~~Full  Stack~~ PHP [Dev task](https://docs.google.com/document/d/1lvhHeItZH1Y2PWA9ZLkQcbkIQ33tWHlnmuUOC4NG_z4/edit?usp=sharing)
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+Site that has a single page showing chart with Bitcoin price in USD. Data come collected by the [Bitfinex API](https://docs.bitfinex.com/v1/reference#rest-public-ticker). On the page exists simple webform allowing the visitor to register for mail notification at given price value. The systems sends notification every time the price reaches the value.
 
-## About Laravel
+![](C:\dev\bitcoin-tracker\page-screenshot.png)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Description
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+The shown on the page chart come loaded directly by the controller, then uses JavaScript `setInterval` function to update the chart content on every 2500ms.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+The data feeding API, adds restriction of maximum 30 calls per minute. The site was build to pull data from it on every 2.5 seconds, which ensures the Api call will not become restricted. 
 
-## Learning Laravel
+The built in Laravel native scheduler (`artisan schedule:run`) has restriction of call per minute, so here was used the [spatie/laravel-short-schedule](https://github.com/spatie/laravel-short-schedule) package which allows the data feeding command (`get:snapshot-from-bitfinex-pubticker`) to be called on the needed interval of 2.5sec.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+The last stated above command writes the new snapshot to the database, then checks does the newly added price exceeds the previously added price. In case it does, the command adds a new command (`notify:relevant-price-reach-subscribers`) call to the queue, passing both the last and current prices as parameters.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+When the 'notify' command come executed it checks does exists any subscriber who's price value comes between both passed prices. If found such subscriber/s, the system sends email to the subscriber's mailbox an message that the stated by him price been reached. Before the message come submitted come executed additional check to the system cache, ensuring there no message sent to the same subscriber in the last hour.
 
-## Laravel Sponsors
+While the site is active, any disruption in the API processing generates error log added to the system's log on every 2.5sec execution. When the API resores own work the normal processing continues.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+In case of the current server outage, the system will stop the data feeding and notifications. After the server restoration it will continue from the last recorded snapshot value, sending notification only to the short list of the subscribers which price value will become within the last recorded before the failure price and the new one taken after the server reboot.
 
-### Premium Partners
+In case of such outage the site cache will be lost. Solution here can be external cache usage and/or the additional storage of the notified subscribers ids within every 'price-increase' shapshot record. 
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[OP.GG](https://op.gg)**
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Installation
 
-## Code of Conduct
+```bash
+composer require pimarinov/bitcoin-tracker
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Setup
 
-## Security Vulnerabilities
+To allow the site data feeding and the visitor subscription processing, run via Cli both shown below commands:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. Allow Bitcoin data to be load by the external Api:
+
+   ```bash
+   php artisan short-schedule:run
+   ```
+
+2. Queue &mdash; for the subscribers sendmail jobs to be processed:
+
+   ```bash
+   php artisan queue:listen
+   ```
+
+The system has config var (`SILENCE_SECONDS_FOR_NOTIFIED_SUBSCRIBER` see `.env.example`) which allows the visitor notifications to be stopped for given time period. This prevents unacceptable count of mail submission for the case of near price fluctuations. 
+
+```php
+SILENCE_SECONDS_FOR_NOTIFIED_SUBSCRIBER=3600
+```
+
+## CLI
+
+Available commands:
+
+```bash
+php artisan get:snapshot-from-bitfinex-pubticker
+```
+
+```bash
+php artisan notify:relevant-price-reach-subscribers 120 236.50
+```
+
+The last command uses 2 price parameters `{last}` & `{current}`, call signatutre is: `notify:relevant-price-reach-subscribers {lastPriceValue} {currentPriceValue}`. It has built-in internal validation for: `$current > $last`&mdash; as the subscribers should be notified only on the price increase.
+
+## Testing
+
+```bash
+php artisan test --coverage-html coverage --coverage-clover coverage
+```
+
+### Tests coverage
+
+Check the **coverage** folder after the test been executed. To load coverage report within the CLI, use: 
+
+```bash
+vendor/bin/phpunit --coverage-html
+```
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information. Project icon credits: <a href="https://www.freepik.com/free-vector/bitcoin-growth-green-chart-background_25022313.htm#page=3&query=bitcoin%20chart&position=0&from_view=keyword">Image by starline</a> on Freepik

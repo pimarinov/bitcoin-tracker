@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Bitcoin tracker'),
 
     /*
     |--------------------------------------------------------------------------
@@ -122,6 +122,8 @@ return [
     'key' => env('APP_KEY'),
 
     'cipher' => 'AES-256-CBC',
+
+    'subscriber_silence_seconds' => env('SILENCE_SECONDS_FOR_NOTIFIED_SUBSCRIBER', 3600),
 
     /*
     |--------------------------------------------------------------------------
