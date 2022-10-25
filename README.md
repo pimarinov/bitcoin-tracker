@@ -10,7 +10,7 @@ Site that has a single page showing chart with Bitcoin price in USD. Data come c
 
 The shown on the page chart come loaded directly by the controller, then uses JavaScript `setInterval` function to update the chart content on every 2500ms.
 
-The data feeding API, adds restriction of maximum 30 calls per minute. The site was build to pull data from it on every 2.5 seconds, which ensures the Api call will not become restricted. The site snapshots interval can be controlled by the dedicated var (`SNAPSHOT_TAKE_INTERVAL_SECONDS=2.5`) from the `.env` file.
+The data feeding API, adds restriction of maximum 30 calls per minute. The site was build to pull data from it on every 2.5 seconds, which ensures the Api call will not become restricted. The site snapshots interval can be controlled by the dedicated var from the `.env` file.
 
 The built in Laravel native scheduler (`artisan schedule:run`) has restriction of call per minute, so here was used the [spatie/laravel-short-schedule](https://github.com/spatie/laravel-short-schedule) package which allows the data feeding command (`get:snapshot-from-bitfinex-pubticker`) to be called on the needed interval of 2.5sec.
 
@@ -65,11 +65,21 @@ To allow the site data feeding and the visitor subscription processing, run via 
    php artisan queue:listen
    ```
 
-The system has config var (`SILENCE_SECONDS_FOR_NOTIFIED_SUBSCRIBER` see `.env.example`) which allows the visitor notifications to be stopped for given time period. This prevents unacceptable count of mail submission for the case of near price fluctuations. 
+The system uses config vars (see `.env.example`):
 
-```php
-SILENCE_SECONDS_FOR_NOTIFIED_SUBSCRIBER=3600
-```
+- **`SNAPSHOT_TAKE_INTERVAL_SECONDS`** - allows change of the snapshot take-interval. 
+    *2.5 sec sec follows the API throttling, at shortest possible pull-data rate.*
+    
+    ```php
+    SNAPSHOT_TAKE_INTERVAL_SECONDS=2.5
+    ```
+
+
+-  **`SUBSCRIBER_SILENCE_SECONDS`** - which allows the visitor notifications to be stopped for given time period. This prevents unacceptable count of mail submission for the case of near price fluctuations.
+
+    ```php
+    SILENCE_SECONDS_FOR_NOTIFIED_SUBSCRIBER=3600
+    ```
 
 ## CLI
 
