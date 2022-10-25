@@ -20,7 +20,7 @@ class PriceReachNotifyAction
 
     public function notify(): array
     {
-        $silenceSeconds = (int) config('app.subscriber_silence_seconds');
+        $silenceSeconds = (int) config('app.subscriber_silence_seconds', 3600);
 
         $matchingSubscribers = $this->getPriceReachSubscribers();
 

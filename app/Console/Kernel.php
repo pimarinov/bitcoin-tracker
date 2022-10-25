@@ -32,7 +32,7 @@ class Kernel extends ConsoleKernel
     {
         $schedule
             ->command('get:snapshot-from-bitfinex-pubticker')
-            ->everySeconds(2.5);
+            ->everySeconds((int) config('app.snapshot_take_interval_seconds', 30));
     }
 
     /**

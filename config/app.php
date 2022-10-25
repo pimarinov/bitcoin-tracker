@@ -123,7 +123,9 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
-    'subscriber_silence_seconds' => env('SILENCE_SECONDS_FOR_NOTIFIED_SUBSCRIBER', 3600),
+    'snapshot_take_interval_seconds' => env('SNAPSHOT_TAKE_INTERVAL_SECONDS', 30),
+
+    'subscriber_silence_seconds' => env('SUBSCRIBER_SILENCE_SECONDS', 3600),
 
     /*
     |--------------------------------------------------------------------------

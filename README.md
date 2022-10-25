@@ -10,7 +10,7 @@ Site that has a single page showing chart with Bitcoin price in USD. Data come c
 
 The shown on the page chart come loaded directly by the controller, then uses JavaScript `setInterval` function to update the chart content on every 2500ms.
 
-The data feeding API, adds restriction of maximum 30 calls per minute. The site was build to pull data from it on every 2.5 seconds, which ensures the Api call will not become restricted. 
+The data feeding API, adds restriction of maximum 30 calls per minute. The site was build to pull data from it on every 2.5 seconds, which ensures the Api call will not become restricted. The site snapshots interval can be controlled by the dedicated var (`SNAPSHOT_TAKE_INTERVAL_SECONDS=2.5`) from the `.env` file.
 
 The built in Laravel native scheduler (`artisan schedule:run`) has restriction of call per minute, so here was used the [spatie/laravel-short-schedule](https://github.com/spatie/laravel-short-schedule) package which allows the data feeding command (`get:snapshot-from-bitfinex-pubticker`) to be called on the needed interval of 2.5sec.
 
@@ -18,11 +18,24 @@ The last stated above command writes the new snapshot to the database, then chec
 
 When the 'notify' command come executed it checks does exists any subscriber who's price value comes between both passed prices. If found such subscriber/s, the system sends email to the subscriber's mailbox an message that the stated by him price been reached. Before the message come submitted come executed additional check to the system cache, ensuring there no message sent to the same subscriber in the last hour.
 
-### External Api failure
+### *In case of* External Api failure
 
 While the site is active, any disruption in the API processing generates error log added to the system's log on every 2.5sec execution. When the API restores own work the normal processing continues.
 
-### Current server failure
+`storage/logs/laravel.log`:
+
+```
+...
+[2022-10-25 05:29:38] local.INFO: Ticked: `get:snapshot-from-bitfinex-pubticker` (#32867, USD19323)  
+[2022-10-25 05:29:41] local.ERROR: cURL error 6: Could not resolve host: api.bitfinex.com (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for https://api.bitfinex.com/v1/pubticker/BTCUSD
+{"exception":"[object] (GuzzleHttp\\Exception\\ConnectException(code: 0): cURL error 6: Could not resolve host: api.bitfinex.com
+(see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for https://api.bitfinex.com/v1/pubticker/BTCUSD at C:\\dev\\bitcoin-tracker\\vendor\\guzzlehttp\\guzzle\\src\\Handler\\CurlFactory.php:210)
+...
+```
+
+
+
+### *In case of* Current server failure
 
 In case of the current server outage, the system will stop the data feeding and notifications. After the server restoration it will continue from the last recorded snapshot value, sending notification only to the short list of the subscribers which price value will become within the last recorded before the failure price and the new one taken after the server reboot.
 
@@ -33,6 +46,8 @@ In case of such outage the site cache will be lost. Solution here can be externa
 ```bash
 composer require pimarinov/bitcoin-tracker
 ```
+
+*PHP 8 was used in development &mdash; max allowed version by [Laravel Framework 7.30.6](https://laravel.com/docs/master/releases#support-policy)*
 
 ## Setup
 

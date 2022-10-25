@@ -12,6 +12,7 @@
     <script>
         const updateBitcoinSnapshots = "{{ route('bitcoin.snapshots') }}";
         const dataJson = @json($snapshots);
+        const chartRefreshInterval = ( {{ (int) $snapshotInterval }} * 1000 ); // 2.5ms
 
         function prepareJson(dataJson) {
             var datePrepared = [];

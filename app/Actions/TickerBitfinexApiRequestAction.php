@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions;
 
 use GuzzleHttp\Client;
@@ -13,6 +15,6 @@ class TickerBitfinexApiRequestAction
         $res = (new Client())
             ->request('GET', self::BITFINEX_API_URL, []);
 
-        return json_decode($res->getBody(), true);
+        return json_decode($res->getBody()->getContents(), true);
     }
 }

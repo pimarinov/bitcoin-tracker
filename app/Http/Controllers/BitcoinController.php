@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Actions\PriceReachSubscribeAction;
@@ -16,7 +18,9 @@ class BitcoinController extends Controller
         $snapshots = (new SnapshotLoadRecentsAction())
             ->loadRecents();
 
-        return (new ResponseViewAction('bitcoin', ['snapshots' => $snapshots]))
+        $snapshotInterval = config('snapshot_take_interval_seconds', 30);
+
+        return (new ResponseViewAction('bitcoin', compact('snapshots', 'snapshotInterval')))
             ->execute();
     }
 

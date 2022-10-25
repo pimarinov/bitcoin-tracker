@@ -43,7 +43,7 @@ class SnapshotTakeAction
         return new SnapshotValues((float) $data['last_price'], $data);
     }
 
-    private function getLastSnapshot(int $newId)
+    private function getLastSnapshot(int $newId): ?Snapshot
     {
         return Snapshot::where('id', '!=', $newId)
             ->orderBy('id', 'desc')
