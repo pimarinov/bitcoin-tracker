@@ -12,12 +12,12 @@
     <script>
         const updateBitcoinSnapshots = "{{ route('bitcoin.snapshots') }}";
         const dataJson = @json($snapshots);
-        const chartRefreshInterval = ( {{ (int) $snapshotInterval }} * 1000 ); // 2.5ms
+        const chartRefreshInterval = ( {{ (float) $snapshotInterval }} * 1000 ); // 2.5ms
 
-        function prepareJson(dataJson) {
+        function addDates(dataJson) {
             var datePrepared = [];
             for (let i = 0; i < dataJson.length; i++) {
-                dataJson[i].t = new Date((dataJson[i].t));
+                dataJson[i].t = new Date((dataJson[i].x));
                 datePrepared.push(dataJson[i]);
             }
             return datePrepared;
@@ -26,7 +26,7 @@
         const data = {
             datasets: [{
                 label: 'Bitcoin Price (USD) -- last 5 minutes',
-                data: prepareJson(dataJson)/*[
+                data: addDates(dataJson)/*[
                     {x: '2022-10-12T13:00:00', y: 20000},
                     {x: '2022-10-12T14:00:00', y: 200},
                     {x: '2022-10-12T15:00:00', y: 20000},
@@ -78,7 +78,7 @@
             };
             xhttp.open("GET", updateBitcoinSnapshots, true);
             xhttp.send();
-        }, 2500);
+        }, chartRefreshInterval);
     </script>
     <div class="container mt-5">
         <form method="post" action="{{ route('bitcoin.subscribe-for-price-reach') }}">

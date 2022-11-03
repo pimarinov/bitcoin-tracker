@@ -25,7 +25,7 @@ class SnapshotLoadRescentsActionTest extends TestCase
     {
         parent::setUp();
 
-        $this->action = new SnapshotLoadRecentsAction();
+        $this->action = app(SnapshotLoadRecentsAction::class);
     }
 
     public function testSnapshotLoadRescentsEmptySuccessCall(): void

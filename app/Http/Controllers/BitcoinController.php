@@ -16,7 +16,7 @@ class BitcoinController extends Controller
     {
         $snapshots = $recentsLoader->execute();
 
-        $snapshotInterval = config('snapshot_take_interval_seconds', 30);
+        $snapshotInterval = (float) config('app.snapshot_take_interval_seconds', 30);
 
         return (new ResponseViewAction('bitcoin', compact('snapshots', 'snapshotInterval')))
             ->execute();
