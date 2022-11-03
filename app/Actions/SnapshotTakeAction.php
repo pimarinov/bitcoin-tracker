@@ -4,49 +4,37 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Actions\TickerBitfinexApiRequestAction;
-use App\DataTransferObjects\SnapshotValues;
 use App\Models\Snapshot;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Http;
 
 class SnapshotTakeAction
 {
-    public function take(): Snapshot
+    public const BITFINEX_API_URL = 'https://api.bitfinex.com/v1/pubticker/BTCUSD';
+
+    public function __construct(private Snapshot $snapshot)
     {
-        $snapshotValues = $this->getValuesFromApi();
+    }
 
-        $snapshot = new Snapshot([
-            'price' => $snapshotValues->price,
-            'full_response' => json_encode($snapshotValues->full_response, 1),
-        ]);
+    /**
+     * @throws \Exception
+     */
+    public function execute(): Snapshot
+    {
+        $res = Http::get(self::BITFINEX_API_URL);
 
-        $snapshot->saveOrFail();
-
-        $prevSnapshot = $this->getLastSnapshot($snapshot->id);
-
-        if ($snapshot->price > ($prevSnapshot->price ?? 0))
+        if ($res->failed())
         {
-            Artisan::queue('notify:relevant-price-reach-subscribers', [
-                'last' => $prevSnapshot->price ?? 0,
-                'increased' => $snapshot->price,
-            ]);
+            throw new \Exception('Failed Bitfinex Api Request', Response::HTTP_REQUEST_TIMEOUT);
         }
 
-        return $snapshot;
-    }
+        $data = json_decode($res->getBody()->getContents(), true);
 
-    private function getValuesFromApi(): SnapshotValues
-    {
-        $apiCaller = new TickerBitfinexApiRequestAction();
-        $data = $apiCaller->execute();
+        $this->snapshot->price = (float) $data['last_price'];
+        $this->snapshot->full_response = json_encode($data, 1);
 
-        return new SnapshotValues((float) $data['last_price'], $data);
-    }
+        $this->snapshot->saveOrFail();
 
-    private function getLastSnapshot(int $newId): ?Snapshot
-    {
-        return Snapshot::where('id', '!=', $newId)
-            ->orderBy('id', 'desc')
-            ->first();
+        return $this->snapshot;
     }
 }

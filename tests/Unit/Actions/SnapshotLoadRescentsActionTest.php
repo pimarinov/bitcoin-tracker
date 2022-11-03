@@ -10,47 +10,57 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
+/**
+ * @internal
+ *
+ * @covers \App\Actions\SnapshotLoadRecentsAction
+ */
 class SnapshotLoadRescentsActionTest extends TestCase
 {
     use DatabaseMigrations;
 
-    public function test_snapshot_load_rescents_empty_success_call(): void
+    private SnapshotLoadRecentsAction $action;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->action = new SnapshotLoadRecentsAction();
+    }
+
+    public function testSnapshotLoadRescentsEmptySuccessCall(): void
     {
         $from = Carbon::now();
 
-        $result = (new SnapshotLoadRecentsAction($from))
-            ->loadRecents();
+        $result = $this->action->execute($from);
 
         $this->assertSame([], $result);
     }
 
-    public function test_snapshot_load_rescents__without_param_success_call(): void
+    public function testSnapshotLoadRescentsWithoutParamSuccessCall(): void
     {
         $snapshots = (new Snapshot())
             ->where('created_at', '>', Carbon::now()->subminutes(5))
             ->get();
 
-        $result = (new SnapshotLoadRecentsAction())
-            ->loadRecents();
+        $result = $this->action->execute();
 
         $this->assertSame($snapshots->count(), count($result));
     }
 
-    public function test_snapshot_load_rescents_with_data_success_call(): void
+    public function testSnapshotLoadRescentsWithDataSuccessCall(): void
     {
-
-        $first = (new Snapshot(['price'=>123, 'full_response' => '[]']))
+        $first = (new Snapshot(['price' => 123, 'full_response' => '[]']))
             ->saveOrFail();
 
-        $second = (new Snapshot(['price'=>123, 'full_response' => '[]']))
+        $second = (new Snapshot(['price' => 123, 'full_response' => '[]']))
             ->save();
 
         $snapshots = (new Snapshot())
             ->where('created_at', '>', Carbon::now()->subminutes(5))
             ->get();
 
-        $result = (new SnapshotLoadRecentsAction())
-            ->loadRecents();
+        $result = $this->action->execute();
 
         $this->assertSame($snapshots->count(), count($result));
     }

@@ -13,7 +13,7 @@ class PriceReachSubscribeAction
     {
     }
 
-    public function subscribe(): PriceReachSubscriber
+    public function execute(): PriceReachSubscriber
     {
         $subscriber = PriceReachSubscriber::firstOrNew(['email' => $this->request->email]);
 

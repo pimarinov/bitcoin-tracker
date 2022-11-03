@@ -38,7 +38,7 @@ class NotifyRelevantPriceReachSubscribers extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(PriceReachNotifyAction $notifyAction)
     {
         $last = (float) $this->argument('last');
         $increased = (float) $this->argument('increased');
@@ -46,10 +46,11 @@ class NotifyRelevantPriceReachSubscribers extends Command
         if ($increased <= $last)
         {
             $this->error("The price ({$increased}) is not increase of last ({$last})!");
+
+            return Command::FAILURE;
         }
 
-        $notifiedList = (new PriceReachNotifyAction($last, $increased))
-            ->notify();
+        $notifiedList = $notifyAction->execute($last, $increased);
 
         $output = $notifiedList
             ? json_encode($notifiedList)

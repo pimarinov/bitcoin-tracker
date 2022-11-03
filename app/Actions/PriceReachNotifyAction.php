@@ -14,18 +14,12 @@ class PriceReachNotifyAction
 {
     public const CACHE_KEY_PREFIX = 'notified-price-reach-subscriber:';
 
-    public function __construct(private float $last, private float $increased)
-    {
-    }
-
-    public function notify(): array
+    public function execute(float $last, float $increased): array
     {
         $silenceSeconds = (int) config('app.subscriber_silence_seconds', 3600);
 
-        $matchingSubscribers = $this->getPriceReachSubscribers();
-
         $notifiedSubscriberIds = [];
-        foreach ($matchingSubscribers as $subscriber)
+        foreach ($this->getPriceReachSubscribers($last, $increased) as $subscriber)
         {
             if (Cache::has(self::CACHE_KEY_PREFIX . $subscriber->id))
             {
@@ -33,27 +27,23 @@ class PriceReachNotifyAction
 
                 continue;
             }
-            $notifiedSubscriberIds[] = $this->sendEmail($subscriber, $silenceSeconds);
+
+            Mail::to($subscriber->email)->send(new PriceReached($subscriber));
+
+            Cache::put(self::CACHE_KEY_PREFIX . $subscriber->id, true, $silenceSeconds);
+
+            $notifiedSubscriberIds[] = $subscriber->id;
         }
 
         return $notifiedSubscriberIds;
     }
 
-    private function getPriceReachSubscribers(): Collection
+    private function getPriceReachSubscribers(float $last, float $increased): Collection
     {
         return (new PriceReachSubscriber())
-            ->where('price', '>=', $this->last)
-            ->where('price', '<', $this->increased)
+            ->where('price', '>=', $last)
+            ->where('price', '<', $increased)
             ->orderBy('id', 'asc')
             ->get();
-    }
-
-    private function sendEmail(PriceReachSubscriber $subscriber, int $seconds): int
-    {
-        Mail::to($subscriber->email)->send(new PriceReached($subscriber));
-
-        Cache::put(self::CACHE_KEY_PREFIX . $subscriber->id, true, $seconds);
-
-        return $subscriber->id;
     }
 }

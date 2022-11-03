@@ -8,11 +8,16 @@ use App\Models\PriceReachSubscriber;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
+/**
+ * @internal
+ *
+ * @covers \App\Console\Commands\NotifyRelevantPriceReachSubscribers
+ */
 class NotifyRelevantPriceReachSubscribersTest extends TestCase
 {
     use DatabaseMigrations;
 
-    public function test_notify_relevant_price_reach_subscribers_success(): void
+    public function testNotifyRelevantPriceReachSubscribersSuccess(): void
     {
         $subscriber = new PriceReachSubscriber([
             'email' => 'johndowe@test.com',
@@ -24,7 +29,7 @@ class NotifyRelevantPriceReachSubscribersTest extends TestCase
             ->assertExitCode(0);
     }
 
-    public function test_notify_relevant_price_reach_subscribers_validates(): void
+    public function testNotifyRelevantPriceReachSubscribersValidates(): void
     {
         $this->artisan('notify:relevant-price-reach-subscribers 123 123')
             ->expectsOutput('The price (123) is not increase of last (123)!');

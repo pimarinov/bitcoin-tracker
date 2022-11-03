@@ -9,42 +9,43 @@ use App\Models\PriceReachSubscriber;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
+/**
+ * @internal
+ *
+ * @covers \App\Actions\PriceReachNotifyAction
+ */
 class PriceReachNotifyActionTest extends TestCase
 {
     use DatabaseMigrations;
 
-    public function test_price_reach_notify_action_no_subscribers_success(): void
+    private PriceReachNotifyAction $action;
+
+    protected function setUp(): void
     {
-        $result = (new PriceReachNotifyAction(1, 2))
-            ->notify();
+        parent::setUp();
+
+        $this->action = new PriceReachNotifyAction();
+    }
+
+    public function testPriceReachNotifyActionNoSubscribersSuccess(): void
+    {
+        $result = $this->action->execute(1, 2);
 
         $this->assertSame([], $result);
     }
 
-    public function test_price_reach_notify_action_one_matching_subscriber_success(): void
+    public function testPriceReachNotifyActionOneMatchingOneSkippedSubscriberSuccess(): void
     {
         $subscriber1 = $this->registerSubscriber('johndowe+1@tes.com', 10);
         $subscriber2 = $this->registerSubscriber('johndowe+2@tes.com', 20);
 
-        $result = (new PriceReachNotifyAction(10, 20))
-            ->notify();
+        $this->action->execute(10, 20);
 
-        $this->assertTrue(in_array($subscriber1->id, $result));
-    }
-
-    public function test_price_reach_notify_action_one_matching_one_skipped_subscriber_success(): void
-    {
-        $subscriber1 = $this->registerSubscriber('johndowe+1@tes.com', 10);
-        $subscriber2 = $this->registerSubscriber('johndowe+2@tes.com', 20);
-
-        (new PriceReachNotifyAction(10, 20))
-            ->notify();
-
-        $result = (new PriceReachNotifyAction(10, 30))
-            ->notify();
+        $result = $this->action->execute(10, 30);
 
         $this->assertTrue(in_array('--skiped:' . $subscriber1->id, $result));
         $this->assertTrue(in_array($subscriber2->id, $result));
+        $this->assertEquals(2, count($result));
     }
 
     private function registerSubscriber(string $email, float $price): PriceReachSubscriber

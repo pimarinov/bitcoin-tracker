@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Actions\SnapshotTakeAction;
+use App\Models\Snapshot;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 
 class GetSnapshotFromBitfinexPubticker extends Command
 {
@@ -36,15 +38,34 @@ class GetSnapshotFromBitfinexPubticker extends Command
      *
      * @return int
      */
-    public function handle()
+    public function handle(SnapshotTakeAction $snapshotAction)
     {
-        // info('Starting: `get:snapshot-from-bitfinex-pubticker`');
+        try
+        {
+            $snapshot = $snapshotAction->execute();
 
-        $snapshot = (new SnapshotTakeAction())->take();
+            $prevSnapshot = Snapshot::where('id', '!=', $snapshot->id)
+                ->orderBy('id', 'desc')
+                ->first();
+
+            if ($snapshot->price > ($prevSnapshot->price ?? 0))
+            {
+                Artisan::queue('notify:relevant-price-reach-subscribers', [
+                    'last' => $prevSnapshot->price ?? 0,
+                    'increased' => $snapshot->price,
+                ]);
+            }
+        }
+        catch (\Exception $e)
+        {
+            $this->error($e->getMessage());
+
+            return Command::FAILURE;
+        }
 
         $out = "(#{$snapshot->id}, USD{$snapshot->price})";
 
-        info('Ticked: `get:snapshot-from-bitfinex-pubticker` ' . $out);
+        $this->info('Ticked: `get:snapshot-from-bitfinex-pubticker` ' . $out);
 
         return 0;
     }

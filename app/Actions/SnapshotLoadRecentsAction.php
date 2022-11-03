@@ -9,17 +9,12 @@ use Carbon\Carbon;
 
 class SnapshotLoadRecentsAction
 {
-    private ?Carbon $starting;
-
-    public function __construct(?Carbon $timeFrom = null)
+    public function execute(?Carbon $timeFrom = null): array
     {
-        $this->starting = $timeFrom ?? Carbon::now()->subminutes(5);
-    }
+        $starting = $timeFrom ?? Carbon::now()->subminutes(5);
 
-    public function loadRecents(Carbon $timeFrom = null): array
-    {
         $snapshots = (new Snapshot())
-            ->where('created_at', '>', $this->starting)
+            ->where('created_at', '>', $starting)
             ->get();
 
         $results = [];

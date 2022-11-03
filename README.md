@@ -108,7 +108,7 @@ php artisan test --coverage-html coverage --coverage-clover coverage
 Check the **coverage** folder after the test been executed. To load coverage report within the CLI, use: 
 
 ```bash
-vendor/bin/phpunit --coverage-html
+vendor/bin/phpunit --coverage-text
 ```
 
 ![tests-coverage](tests-coverage-screenshot.png)
@@ -116,4 +116,3 @@ vendor/bin/phpunit --coverage-html
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information. Project icon credits: <a href="https://www.freepik.com/free-vector/bitcoin-growth-green-chart-background_25022313.htm#page=3&query=bitcoin%20chart&position=0&from_view=keyword">Image by starline</a> on Freepik
-
