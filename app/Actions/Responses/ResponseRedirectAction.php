@@ -11,14 +11,14 @@ class ResponseRedirectAction
     }
 
     public function execute(
-        ?string $to = null,
+        ?string $toUrl = null,
         ?int $status = 302,
         array $headers = [],
         ?bool $secure = null
     ): \Illuminate\Http\RedirectResponse {
         $redirect = isset($this->route)
             ? redirect()->route($this->route)
-            : redirect($to, $status, $headers, $secure);
+            : redirect($toUrl, $status, $headers, $secure);
 
         return is_null($this->success)
             ? $redirect

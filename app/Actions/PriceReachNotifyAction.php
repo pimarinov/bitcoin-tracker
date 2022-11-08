@@ -18,12 +18,12 @@ class PriceReachNotifyAction
     {
         $silenceSeconds = (int) config('app.subscriber_silence_seconds', 3600);
 
-        $notifiedSubscriberIds = [];
+        $reachedSubscriberIds = [];
         foreach ($this->getPriceReachSubscribers($last, $increased) as $subscriber)
         {
             if (Cache::has(self::CACHE_KEY_PREFIX . $subscriber->id))
             {
-                $notifiedSubscriberIds[] = '--skiped:' . $subscriber->id;
+                $reachedSubscriberIds[] = '--skiped:' . $subscriber->id;
 
                 continue;
             }
@@ -32,10 +32,10 @@ class PriceReachNotifyAction
 
             Cache::put(self::CACHE_KEY_PREFIX . $subscriber->id, true, $silenceSeconds);
 
-            $notifiedSubscriberIds[] = $subscriber->id;
+            $reachedSubscriberIds[] = $subscriber->id;
         }
 
-        return $notifiedSubscriberIds;
+        return $reachedSubscriberIds;
     }
 
     private function getPriceReachSubscribers(float $last, float $increased): Collection

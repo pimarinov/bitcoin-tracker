@@ -98,7 +98,7 @@ The last command uses 2 price parameters `{last}` & `{current}`, call signatutre
 ## Testing
 
 ```bash
-php artisan test --coverage-html coverage --coverage-clover coverage
+php artisan test --coverage-html coverage --coverage-clover coverage/clover.xml
 ```
 
    **Note** Tests aims higher level of coverage, omitting the test doubles.
